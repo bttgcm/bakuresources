@@ -11,6 +11,7 @@
 
   if (!window.supabase) {
     console.error("Supabase JS failed to load; sign-in and venue/comment features are disabled.");
+    window.authReady = Promise.resolve(null);
     return;
   }
 
@@ -55,8 +56,13 @@
     updateUI(session ? session.user : null);
   });
 
-  sb.auth.getSession().then(function (res) {
-    updateUI(res.data.session ? res.data.session.user : null);
+  // app.js awaits this before its first render, so the initial render already
+  // knows whether a user is signed in instead of flashing CSV-only pins and
+  // then re-rendering a moment later once the session check comes back.
+  window.authReady = sb.auth.getSession().then(function (res) {
+    var user = res.data.session ? res.data.session.user : null;
+    updateUI(user);
+    return user;
   });
 
   function signIn() {

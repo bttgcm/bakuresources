@@ -525,7 +525,7 @@
     if (currentCategoryId) renderCategory(currentCategoryId);
   });
 
-  loadCategories().then(function () {
+  Promise.all([loadCategories(), window.authReady]).then(function () {
     if (categories.length) {
       select.value = categories[0].id;
       renderCategory(categories[0].id);
