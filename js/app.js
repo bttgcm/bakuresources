@@ -17,14 +17,18 @@
   var markersLayer = L.layerGroup().addTo(map);
   var select = document.getElementById("category-select");
   var loadingEl = document.getElementById("loading");
-  var unlocatedPanel = document.getElementById("unlocated-panel");
-  var unlocatedToggle = document.getElementById("unlocated-toggle");
-  var unlocatedList = document.getElementById("unlocated-list");
+  var venueListPanel = document.getElementById("venue-list-panel");
+  var venueListToggle = document.getElementById("venue-list-toggle");
+  var venueListSearch = document.getElementById("venue-list-search");
+  var venueListEl = document.getElementById("venue-list");
 
   var categories = [];
   var csvCache = {}; // categoryId -> array of row objects
   var currentUser = null;
   var currentCategoryId = null;
+  var currentListRows = []; // all rows (located + unlocated) in the current category
+  var commentsByRef = {}; // venueRef -> array of comment rows, for the current category
+  var markerByRef = {}; // venueRef -> Leaflet marker, for the current category
 
   // ---- add-venue UI state ----
   var addVenuePanel = document.getElementById("add-venue-panel");
@@ -219,34 +223,102 @@
     return container;
   }
 
-  function renderUnlocatedList(rows, cat) {
-    unlocatedList.innerHTML = "";
+  // ---- venue list panel (searchable listing for the current category) ----
 
-    if (!rows.length) {
-      unlocatedPanel.hidden = true;
-      return;
+  function rowMatchesQuery(row, query) {
+    if (!query) return true;
+    var userComments = (commentsByRef[row.venueRef] || [])
+      .map(function (c) {
+        return c.body;
+      })
+      .join(" ");
+    var haystack = [row.name, row.description, row.comment, row.address, userComments]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    return haystack.indexOf(query) !== -1;
+  }
+
+  function buildVenueListItem(row) {
+    var li = document.createElement("li");
+    var located = hasCoords(row);
+    if (located) li.className = "venue-list-locatable";
+
+    var html = '<span class="venue-list-name">' + escapeHtml(row.name || "Unnamed") + "</span>";
+    if (row.description) html += "<br>" + escapeHtml(row.description);
+    if (row.address) html += '<br><span class="venue-list-muted">' + escapeHtml(row.address) + "</span>";
+    if (row.url)
+      html += '<br><a href="' + escapeAttr(row.url) + '" target="_blank" rel="noopener">Website</a>';
+    if (row.maps_url)
+      html +=
+        '<br><a href="' + escapeAttr(row.maps_url) + '" target="_blank" rel="noopener">Open in Google Maps</a>';
+    if (row.comment) html += '<div class="popup-comment">' + escapeHtml(row.comment) + "</div>";
+
+    var userComments = commentsByRef[row.venueRef];
+    if (userComments && userComments.length) {
+      html += '<div class="venue-list-comments">';
+      userComments.forEach(function (c) {
+        html +=
+          '<div class="venue-list-comment"><span class="comment-author">' +
+          escapeHtml(c.created_by_email || "Someone") +
+          "</span>" +
+          escapeHtml(c.body) +
+          "</div>";
+      });
+      html += "</div>";
     }
 
-    unlocatedPanel.hidden = false;
-    unlocatedToggle.textContent =
-      "📍 " + rows.length + " more " + cat.label.toLowerCase() + " without exact map location ▾";
+    if (!located) html += '<br><span class="venue-list-muted">No exact map location</span>';
+    li.innerHTML = html;
 
-    rows.forEach(function (row) {
-      var li = document.createElement("li");
-      var line = escapeHtml(row.name || "Unnamed");
-      if (row.description) line += " – " + escapeHtml(row.description);
-      li.innerHTML = line;
+    if (located) {
+      li.addEventListener("click", function (e) {
+        if (e.target.tagName === "A") return;
+        var marker = markerByRef[row.venueRef];
+        if (!marker) return;
+        map.setView(marker.getLatLng(), 16);
+        marker.openPopup();
+        venueListPanel.classList.remove("open");
+      });
+    }
 
-      if (row.url) {
-        li.innerHTML += ' &middot; <a href="' + escapeAttr(row.url) + '" target="_blank" rel="noopener">Website</a>';
-      }
-      if (row.maps_url) {
-        li.innerHTML += ' &middot; <a href="' + escapeAttr(row.maps_url) + '" target="_blank" rel="noopener">Google Maps</a>';
-      }
-      if (row.comment) {
-        li.innerHTML += '<div class="popup-comment">' + escapeHtml(row.comment) + "</div>";
-      }
-      unlocatedList.appendChild(li);
+    return li;
+  }
+
+  function applyVenueListFilter() {
+    var query = venueListSearch.value.trim().toLowerCase();
+    var filtered = currentListRows.filter(function (row) {
+      return rowMatchesQuery(row, query);
+    });
+
+    venueListEl.innerHTML = "";
+    if (!filtered.length) {
+      var empty = document.createElement("li");
+      empty.className = "venue-list-muted";
+      empty.textContent = "No matches.";
+      venueListEl.appendChild(empty);
+      return;
+    }
+    filtered.forEach(function (row) {
+      venueListEl.appendChild(buildVenueListItem(row));
+    });
+  }
+
+  function renderVenueList(rows, cat) {
+    currentListRows = rows;
+    commentsByRef = {};
+    venueListSearch.value = "";
+    venueListToggle.textContent =
+      "📋 " + rows.length + " " + cat.label.toLowerCase() + " — tap to search ▾";
+    applyVenueListFilter();
+
+    if (!currentUser || !rows.length) return;
+    var refs = rows.map(function (row) {
+      return row.venueRef;
+    });
+    window.VenuesDB.fetchCommentsForRefs(refs).then(function (byRef) {
+      commentsByRef = byRef;
+      applyVenueListFilter();
     });
   }
 
@@ -265,6 +337,7 @@
     });
     marker.addTo(markersLayer);
     bounds.push([row.lat, row.lon]);
+    markerByRef[row.venueRef] = marker;
   }
 
   function renderCategory(catId) {
@@ -285,6 +358,7 @@
         var csvRows = results[0];
         var dbRows = results[1];
         markersLayer.clearLayers();
+        markerByRef = {};
 
         var located = csvRows.filter(hasCoords).concat(dbRows);
         var unlocated = csvRows.filter(function (r) {
@@ -300,8 +374,8 @@
           map.fitBounds(bounds, { padding: [30, 30], maxZoom: 15 });
         }
 
-        renderUnlocatedList(unlocated, cat);
-        unlocatedPanel.classList.remove("open");
+        renderVenueList(located.concat(unlocated), cat);
+        venueListPanel.classList.remove("open");
       })
       .catch(function (err) {
         console.error("Error loading category " + catId, err);
@@ -439,9 +513,11 @@
     renderCategory(select.value);
   });
 
-  unlocatedToggle.addEventListener("click", function () {
-    unlocatedPanel.classList.toggle("open");
+  venueListToggle.addEventListener("click", function () {
+    venueListPanel.classList.toggle("open");
   });
+
+  venueListSearch.addEventListener("input", applyVenueListFilter);
 
   window.onAuthChange(function (user) {
     currentUser = user;

@@ -431,8 +431,9 @@ a:hover {
   background: var(--accent-link);
 }
 
-/* unlocated panel */
-#unlocated-panel {
+/* venue list panel — collapsed toggle showing the current category's
+   count; expands to a searchable list of every venue in it */
+#venue-list-panel {
   position: absolute;
   left: 0.6rem;
   right: 0.6rem;
@@ -447,7 +448,7 @@ a:hover {
   flex-direction: column;
 }
 
-#unlocated-toggle {
+#venue-list-toggle {
   width: 100%;
   text-align: left;
   border: none;
@@ -463,24 +464,81 @@ a:hover {
   border-radius: 0;
 }
 
-#unlocated-list {
+#venue-list-body {
+  display: flex;
+  flex-direction: column;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease;
+}
+
+#venue-list-panel.open #venue-list-body {
+  max-height: 52vh;
+}
+
+#venue-list-search {
+  margin: 0.6rem 0.8rem 0.3rem;
+  padding: 0.4rem 0.1rem;
+  border: none;
+  border-bottom: 1px solid var(--hairline);
+  border-radius: 0;
+  font-family: inherit;
+  font-size: 0.85rem;
+  background: transparent;
+  color: var(--ink);
+  flex: none;
+}
+
+#venue-list-search:focus {
+  outline: none;
+  border-bottom-color: var(--accent-link);
+}
+
+#venue-list {
   list-style: none;
   margin: 0;
   padding: 0;
   overflow-y: auto;
-  max-height: 0;
-  transition: max-height 0.2s ease;
 }
 
-#unlocated-panel.open #unlocated-list {
-  max-height: 46vh;
-}
-
-#unlocated-list li {
+#venue-list li {
   padding: 0.55rem 0.8rem;
   font-size: 0.85rem;
   border-top: 1px solid var(--hairline);
   line-height: 1.35;
+}
+
+#venue-list li.venue-list-locatable {
+  cursor: pointer;
+}
+
+#venue-list li.venue-list-locatable:hover {
+  background: #f5f5f5;
+}
+
+#venue-list .venue-list-name {
+  font-weight: 600;
+}
+
+#venue-list .venue-list-muted {
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
+#venue-list .venue-list-comments {
+  margin-top: 0.4rem;
+  padding-top: 0.35rem;
+  border-top: 1px dashed var(--hairline);
+}
+
+#venue-list .venue-list-comment {
+  font-size: 0.8rem;
+  margin-top: 0.3rem;
+}
+
+#venue-list .venue-list-comment:first-child {
+  margin-top: 0;
 }
 
 /* leaflet popup content */

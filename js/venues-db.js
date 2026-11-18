@@ -77,6 +77,27 @@
       });
   }
 
+  function fetchCommentsForRefs(venueRefs) {
+    if (!venueRefs.length) return Promise.resolve({});
+    return window.sb
+      .from("comments")
+      .select("*")
+      .in("venue_ref", venueRefs)
+      .order("created_at", { ascending: true })
+      .then(function (res) {
+        if (res.error) {
+          console.error("fetchCommentsForRefs", res.error);
+          return {};
+        }
+        var byRef = {};
+        (res.data || []).forEach(function (c) {
+          if (!byRef[c.venue_ref]) byRef[c.venue_ref] = [];
+          byRef[c.venue_ref].push(c);
+        });
+        return byRef;
+      });
+  }
+
   function addComment(venueRef, body) {
     return window.getCurrentUser().then(function (user) {
       if (!user) return Promise.reject(new Error("Not signed in"));
@@ -99,6 +120,7 @@
     fetchDbVenues: fetchDbVenues,
     addVenue: addVenue,
     fetchComments: fetchComments,
+    fetchCommentsForRefs: fetchCommentsForRefs,
     addComment: addComment
   };
 })();

@@ -47,3 +47,10 @@ create policy "Authenticated users can read comments"
 create policy "Authenticated users can add comments"
   on comments for insert
   with check (auth.uid() = created_by);
+
+-- Tables created via the SQL editor (unlike the dashboard's table UI) don't
+-- automatically grant table-level privileges to the authenticated role —
+-- RLS policies alone aren't enough, Postgres checks base GRANTs first.
+grant usage on schema public to authenticated;
+grant select, insert on public.venues to authenticated;
+grant select, insert on public.comments to authenticated;
