@@ -15,7 +15,17 @@
     return;
   }
 
-  var sb = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+  // A plain page reload can let the browser serve a cached response for the
+  // venues/comments GET requests, so newly-added rows seem missing until a
+  // hard refresh bypasses that cache. Force every request from this client
+  // to skip the HTTP cache and always hit the network.
+  var sb = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY, {
+    global: {
+      fetch: function (url, options) {
+        return fetch(url, Object.assign({}, options, { cache: "no-store" }));
+      }
+    }
+  });
   window.sb = sb;
 
   // Supabase auth still needs an email-shaped identifier under the hood.
