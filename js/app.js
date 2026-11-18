@@ -112,6 +112,14 @@
     );
   }
 
+  function mapsUrlFor(row) {
+    if (row.maps_url) return row.maps_url;
+    if (hasCoords(row)) {
+      return "https://www.google.com/maps/search/?api=1&query=" + row.lat + "," + row.lon;
+    }
+    return null;
+  }
+
   function escapeHtml(str) {
     return String(str)
       .replace(/&/g, "&amp;")
@@ -157,9 +165,9 @@
     if (row.address) html += "<br><i>" + escapeHtml(row.address) + "</i>";
     if (row.url)
       html += '<br><a href="' + escapeAttr(row.url) + '" target="_blank" rel="noopener">Website</a>';
-    if (row.maps_url)
-      html +=
-        '<br><a href="' + escapeAttr(row.maps_url) + '" target="_blank" rel="noopener">Open in Google Maps</a>';
+    var mapsUrl = mapsUrlFor(row);
+    if (mapsUrl)
+      html += '<br><a href="' + escapeAttr(mapsUrl) + '" target="_blank" rel="noopener">Open in Google Maps</a>';
     if (row.comment) html += '<div class="popup-comment">' + escapeHtml(row.comment) + "</div>";
     container.innerHTML = html;
 
@@ -248,9 +256,9 @@
     if (row.address) html += '<br><span class="venue-list-muted">' + escapeHtml(row.address) + "</span>";
     if (row.url)
       html += '<br><a href="' + escapeAttr(row.url) + '" target="_blank" rel="noopener">Website</a>';
-    if (row.maps_url)
-      html +=
-        '<br><a href="' + escapeAttr(row.maps_url) + '" target="_blank" rel="noopener">Open in Google Maps</a>';
+    var mapsUrl = mapsUrlFor(row);
+    if (mapsUrl)
+      html += '<br><a href="' + escapeAttr(mapsUrl) + '" target="_blank" rel="noopener">Open in Google Maps</a>';
     if (row.comment) html += '<div class="popup-comment">' + escapeHtml(row.comment) + "</div>";
 
     var userComments = commentsByRef[row.venueRef];
