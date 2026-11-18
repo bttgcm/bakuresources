@@ -360,8 +360,8 @@
         markersLayer.clearLayers();
         markerByRef = {};
 
-        var located = csvRows.filter(hasCoords).concat(dbRows);
-        var unlocated = csvRows.filter(function (r) {
+        var located = csvRows.filter(hasCoords).concat(dbRows.filter(hasCoords));
+        var unlocated = csvRows.concat(dbRows).filter(function (r) {
           return !hasCoords(r);
         });
 
