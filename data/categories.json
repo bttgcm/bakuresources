@@ -1,9 +1,9 @@
 [
-  { "id": "sights", "label": "Sights", "file": "data/sights.csv", "icon": "🏛️" },
-  { "id": "restaurants", "label": "Restaurants", "file": "data/restaurants.csv", "icon": "🍴" },
-  { "id": "hotels", "label": "Hotels", "file": "data/hotels.csv", "icon": "🏨" },
-  { "id": "museums", "label": "Museums", "file": "data/museums.csv", "icon": "🖼️" },
-  { "id": "shopping", "label": "Shopping", "file": "data/shopping.csv", "icon": "🛍️" },
-  { "id": "grocery", "label": "Grocery", "file": "data/grocery.csv", "icon": "🛒" },
-  { "id": "travelling", "label": "Travelling", "file": "data/travelling.csv", "icon": "✈️" }
+  { "id": "sights", "label": "Sights", "file": "data/sights.csv", "icon": "🏛️", "color": "#ff3366" },
+  { "id": "restaurants", "label": "Restaurants", "file": "data/restaurants.csv", "icon": "🍴", "color": "#0066ff" },
+  { "id": "hotels", "label": "Hotels", "file": "data/hotels.csv", "icon": "🏨", "color": "#16a085" },
+  { "id": "museums", "label": "Museums", "file": "data/museums.csv", "icon": "🖼️", "color": "#8e44ad" },
+  { "id": "shopping", "label": "Shopping", "file": "data/shopping.csv", "icon": "🛍️", "color": "#f39c12" },
+  { "id": "grocery", "label": "Grocery", "file": "data/grocery.csv", "icon": "🛒", "color": "#27ae60" },
+  { "id": "travelling", "label": "Travelling", "file": "data/travelling.csv", "icon": "✈️", "color": "#7f8c8d" }
 ]

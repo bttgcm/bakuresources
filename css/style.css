@@ -673,4 +673,11 @@ a:hover {
     border-left: none;
     border: 1px solid var(--hairline);
   }
+
+  /* on narrow screens the OpenFreeMap/OpenStreetMap attribution text wraps
+     to two lines, tall enough to sit on top of (and hide) this panel's
+     toggle bar since both are anchored to the same bottom-right corner */
+  #venue-list-panel {
+    bottom: 2.8rem;
+  }
 }

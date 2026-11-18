@@ -3,8 +3,7 @@
 
   var BAKU_CENTER = [40.3777, 49.8920];
   var DEFAULT_ZOOM = 12;
-  var MARKER_COLOR = "#ff3366"; // accent-title — curated (CSV) venues
-  var DB_MARKER_COLOR = "#0066ff"; // accent-link — community-added venues
+  var DEFAULT_MARKER_COLOR = "#ff3366"; // accent-title — fallback if a category has no color
   var MARKER_RADIUS = 5;
 
   var map = L.map("map", { zoomControl: true }).setView(BAKU_CENTER, DEFAULT_ZOOM);
@@ -322,8 +321,7 @@
     });
   }
 
-  function addMarkerFor(row, bounds) {
-    var color = row.source === "db" ? DB_MARKER_COLOR : MARKER_COLOR;
+  function addMarkerFor(row, bounds, color) {
     var marker = L.circleMarker([row.lat, row.lon], {
       radius: MARKER_RADIUS,
       color: color,
@@ -363,9 +361,10 @@
           return !hasCoords(r);
         });
 
+        var color = cat.color || DEFAULT_MARKER_COLOR;
         var bounds = [];
         located.forEach(function (row) {
-          addMarkerFor(row, bounds);
+          addMarkerFor(row, bounds, color);
         });
 
         if (bounds.length) {
