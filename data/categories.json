@@ -2,5 +2,8 @@
   { "id": "sights", "label": "Sights", "file": "data/sights.csv", "icon": "🏛️" },
   { "id": "restaurants", "label": "Restaurants", "file": "data/restaurants.csv", "icon": "🍴" },
   { "id": "hotels", "label": "Hotels", "file": "data/hotels.csv", "icon": "🏨" },
-  { "id": "museums", "label": "Museums", "file": "data/museums.csv", "icon": "🖼️" }
+  { "id": "museums", "label": "Museums", "file": "data/museums.csv", "icon": "🖼️" },
+  { "id": "shopping", "label": "Shopping", "file": "data/shopping.csv", "icon": "🛍️" },
+  { "id": "grocery", "label": "Grocery", "file": "data/grocery.csv", "icon": "🛒" },
+  { "id": "travelling", "label": "Travelling", "file": "data/travelling.csv", "icon": "✈️" }
 ]

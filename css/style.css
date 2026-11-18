@@ -1,57 +1,100 @@
+/* Same font/design system as giacomobutte.com: Inter + JetBrains Mono,
+   brutalist/minimal — black & white, 1px rules, square corners, no shadows. */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --accent-link: #0066ff;
+  --accent-title: #ff3366;
+  --ink: #000000;
+  --muted: #666666;
+  --hairline: #000000;
+}
+
 * {
   box-sizing: border-box;
+}
+
+/* Several elements below also set their own `display` (flex, etc.) by id,
+   which — being an author rule — otherwise overrides the browser's native
+   [hidden]{display:none}, silently defeating el.hidden = true/false from JS. */
+[hidden] {
+  display: none !important;
 }
 
 html, body {
   margin: 0;
   padding: 0;
   height: 100%;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: var(--ink);
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+a {
+  color: var(--accent-link);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
 }
 
 #app-header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  padding: 0.6rem 0.8rem;
-  background: #111827;
+  gap: 0.6rem;
+  padding: 0.6rem 1rem;
+  background: #000;
   color: #fff;
   position: relative;
   z-index: 1000;
 }
 
 #app-header h1 {
-  font-size: 1.05rem;
+  font-size: 0.95rem;
+  font-weight: 500;
   margin: 0;
   white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 #category-select {
-  font-size: 1rem;
-  padding: 0.4rem 0.6rem;
-  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 0.35rem 0;
   border: none;
-  background: #fff;
-  color: #111827;
+  border-bottom: 1px solid #fff;
+  border-radius: 0;
+  background: transparent;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   min-width: 0;
   flex: 1;
   max-width: 220px;
+  cursor: pointer;
 }
 
-#map {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 0;
+#category-select:focus {
+  outline: none;
+  border-bottom-color: var(--accent-link);
 }
 
-/* header pushes the map down instead of overlapping it */
-body {
-  display: flex;
-  flex-direction: column;
+/* the closed select stays white-on-black (it sits in the dark header),
+   but the dropdown list itself uses the browser's native white
+   background, so its options need dark text to stay legible */
+#category-select option {
+  color: #000;
+  background: #fff;
 }
 
 #map {
@@ -64,13 +107,331 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: rgba(17, 24, 39, 0.85);
+  background: #000;
   color: #fff;
-  padding: 0.6rem 1rem;
-  border-radius: 8px;
+  padding: 0.6rem 1.1rem;
+  border-radius: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.8rem;
   z-index: 2000;
 }
 
+/* about button + modal */
+#about-btn {
+  position: absolute;
+  left: 0.6rem;
+  bottom: 0.6rem;
+  z-index: 950;
+  font-family: inherit;
+  font-size: 0.72rem;
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--hairline);
+  border-radius: 0;
+  background: #fff;
+  color: var(--ink);
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+#about-btn:hover {
+  background: #000;
+  color: #fff;
+}
+
+#about-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.2rem;
+}
+
+#about-modal {
+  position: relative;
+  background: #fff;
+  border: 1px solid var(--hairline);
+  border-radius: 0;
+  max-width: 420px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 1.4rem 1.2rem 1.2rem;
+}
+
+#about-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.6rem;
+  border: none;
+  background: none;
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--ink);
+}
+
+#about-close:hover {
+  color: var(--accent-link);
+}
+
+#about-content h1 {
+  font-size: 1.1rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent-title);
+  margin: 0 0 0.8rem;
+}
+
+#about-content p {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0 0 0.8rem;
+}
+
+/* auth controls, merged into the header itself to save vertical space —
+   the signed-out and signed-in groups occupy the same slot, toggled by
+   [hidden] depending on whether a session is active. */
+#auth-signed-out,
+#auth-signed-in {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-left: auto;
+}
+
+#auth-signed-out input {
+  font-family: inherit;
+  font-size: 0.82rem;
+  padding: 0.3rem 0.1rem;
+  border: none;
+  border-bottom: 1px solid #fff;
+  border-radius: 0;
+  background: transparent;
+  color: #fff;
+  width: 8.5rem;
+}
+
+#auth-signed-out input::placeholder {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+#auth-signed-out input:focus {
+  outline: none;
+  border-bottom-color: var(--accent-link);
+}
+
+#auth-signed-out button,
+#auth-signed-in button {
+  font-family: inherit;
+  font-size: 0.78rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 0;
+  background: #fff;
+  color: #000;
+  border: none;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+#auth-signed-out button:hover,
+#auth-signed-in button:hover {
+  background: var(--accent-link);
+  color: #fff;
+}
+
+#auth-user-email {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+#auth-status {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.72rem;
+}
+
+/* add-venue panel — docked to the right on desktop, leaving most of the
+   map clickable for pinning; becomes a bottom sheet on narrow screens
+   (see media query below). */
+#add-venue-panel {
+  position: absolute;
+  top: 3.6rem;
+  right: 0;
+  bottom: 0;
+  left: auto;
+  width: 360px;
+  max-width: 92vw;
+  z-index: 1100;
+  background: #fff;
+  border: none;
+  border-left: 1px solid var(--hairline);
+  border-radius: 0;
+  padding: 1rem;
+  max-height: none;
+  overflow-y: auto;
+}
+
+#add-venue-panel h2 {
+  margin: 0 0 0.4rem;
+  font-size: 1rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent-title);
+}
+
+#add-venue-panel .hint {
+  margin: 0 0 0.6rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+#add-venue-close {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.7rem;
+  border: none;
+  background: none;
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--ink);
+}
+
+#add-venue-close:hover {
+  color: var(--accent-link);
+}
+
+#add-venue-search {
+  display: flex;
+  gap: 0.4rem;
+}
+
+#add-venue-search input {
+  flex: 1;
+  font-family: inherit;
+  padding: 0.4rem 0.1rem;
+  border: none;
+  border-bottom: 1px solid var(--hairline);
+  border-radius: 0;
+  background: transparent;
+}
+
+#add-venue-search input:focus {
+  outline: none;
+  border-bottom-color: var(--accent-link);
+}
+
+#add-venue-search button {
+  font-family: inherit;
+  padding: 0.4rem 0.8rem;
+  border-radius: 0;
+  border: none;
+  background: #000;
+  color: #fff;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.8rem;
+}
+
+#add-venue-search button:hover {
+  background: var(--accent-link);
+}
+
+#add-venue-results {
+  list-style: none;
+  margin: 0.3rem 0;
+  padding: 0;
+  max-height: 30vh;
+  overflow-y: auto;
+}
+
+#add-venue-results li button {
+  width: 100%;
+  text-align: left;
+  padding: 0.5rem 0.1rem;
+  border: none;
+  border-bottom: 1px dashed var(--hairline);
+  background: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-family: inherit;
+}
+
+#add-venue-results li button:hover {
+  color: var(--accent-link);
+}
+
+#add-venue-location {
+  font-family: "JetBrains Mono", "Courier New", Courier, monospace;
+  font-size: 0.8rem;
+  margin: 0.5rem 0;
+  color: var(--muted);
+}
+
+#add-venue-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+#add-venue-form input,
+#add-venue-form select,
+#add-venue-form textarea {
+  padding: 0.4rem 0.1rem;
+  border: none;
+  border-bottom: 1px solid var(--hairline);
+  border-radius: 0;
+  font-size: 0.9rem;
+  font-family: inherit;
+  background: transparent;
+  color: var(--ink);
+}
+
+#add-venue-form select {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+#add-venue-form input:focus,
+#add-venue-form select:focus,
+#add-venue-form textarea:focus {
+  outline: none;
+  border-bottom-color: var(--accent-link);
+}
+
+#add-venue-form button {
+  padding: 0.55rem;
+  border-radius: 0;
+  border: none;
+  background: #000;
+  color: #fff;
+  font-weight: 500;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.85rem;
+}
+
+#add-venue-form button:hover {
+  background: var(--accent-link);
+}
+
+/* unlocated panel */
 #unlocated-panel {
   position: absolute;
   left: 0.6rem;
@@ -78,8 +439,8 @@ body {
   bottom: 0.6rem;
   z-index: 900;
   background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--hairline);
+  border-radius: 0;
   max-height: 60vh;
   overflow: hidden;
   display: flex;
@@ -90,12 +451,16 @@ body {
   width: 100%;
   text-align: left;
   border: none;
-  background: #f3f4f6;
+  background: #000;
+  color: #fff;
   padding: 0.6rem 0.8rem;
-  font-size: 0.9rem;
-  font-weight: 600;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   cursor: pointer;
-  border-radius: 10px;
+  border-radius: 0;
 }
 
 #unlocated-list {
@@ -112,200 +477,47 @@ body {
 }
 
 #unlocated-list li {
-  padding: 0.5rem 0.8rem;
+  padding: 0.55rem 0.8rem;
   font-size: 0.85rem;
-  border-top: 1px solid #e5e7eb;
-  line-height: 1.3;
-}
-
-#unlocated-list a {
-  color: #2563eb;
-}
-
-.leaflet-popup-content {
-  font-size: 0.95rem;
+  border-top: 1px solid var(--hairline);
   line-height: 1.35;
+}
+
+/* leaflet popup content */
+.leaflet-popup-content {
+  font-size: 0.92rem;
+  line-height: 1.4;
 }
 
 .leaflet-popup-content b {
   font-size: 1rem;
+  font-weight: 600;
 }
 
 .popup-comment {
-  margin-top: 0.4rem;
-  padding: 0.35rem 0.5rem;
-  background: #fdf2f3;
-  border-left: 3px solid #722F37;
+  margin-top: 0.5rem;
+  display: inline-block;
+  background-image: linear-gradient(to right, #f2f5cc, #c5efb3, #ffffff);
+  padding: 3px 6px;
   font-size: 0.85rem;
   font-style: italic;
-  color: #3f1b1f;
-}
-
-/* auth bar */
-#auth-bar {
-  background: #f3f4f6;
-  padding: 0.4rem 0.8rem;
-  font-size: 0.85rem;
-  position: relative;
-  z-index: 1000;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  align-items: center;
-}
-
-#auth-signed-out,
-#auth-signed-in {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  align-items: center;
-  width: 100%;
-}
-
-#auth-bar input,
-#auth-bar button {
-  font-size: 0.85rem;
-  padding: 0.3rem 0.5rem;
-  border-radius: 6px;
-  border: 1px solid #d1d5db;
-}
-
-#auth-bar button {
-  background: #722f37;
-  color: #fff;
-  border: none;
-  cursor: pointer;
-}
-
-#auth-user-email {
-  font-weight: 600;
-  margin-right: auto;
-}
-
-#auth-status {
-  color: #4b5563;
-}
-
-/* add-venue panel */
-#add-venue-panel {
-  position: absolute;
-  left: 0.6rem;
-  right: 0.6rem;
-  top: 4.2rem;
-  z-index: 1100;
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-  padding: 0.8rem;
-  max-height: 75vh;
-  overflow-y: auto;
-}
-
-#add-venue-panel h2 {
-  margin: 0 0 0.3rem;
-  font-size: 1rem;
-}
-
-#add-venue-panel .hint {
-  margin: 0 0 0.5rem;
-  font-size: 0.85rem;
-  color: #4b5563;
-}
-
-#add-venue-close {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.6rem;
-  border: none;
-  background: none;
-  font-size: 1.3rem;
-  line-height: 1;
-  cursor: pointer;
-}
-
-#add-venue-search {
-  display: flex;
-  gap: 0.4rem;
-}
-
-#add-venue-search input {
-  flex: 1;
-  padding: 0.4rem;
-  border-radius: 6px;
-  border: 1px solid #d1d5db;
-}
-
-#add-venue-search button {
-  padding: 0.4rem 0.7rem;
-  border-radius: 6px;
-  border: none;
-  background: #111827;
-  color: #fff;
-  cursor: pointer;
-}
-
-#add-venue-results {
-  list-style: none;
-  margin: 0.3rem 0;
-  padding: 0;
-  max-height: 30vh;
-  overflow-y: auto;
-}
-
-#add-venue-results li button {
-  width: 100%;
-  text-align: left;
-  padding: 0.4rem;
-  border: none;
-  border-bottom: 1px solid #e5e7eb;
-  background: none;
-  cursor: pointer;
-  font-size: 0.85rem;
-}
-
-#add-venue-location {
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin: 0.4rem 0;
-}
-
-#add-venue-form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-
-#add-venue-form input,
-#add-venue-form textarea {
-  padding: 0.4rem;
-  border-radius: 6px;
-  border: 1px solid #d1d5db;
-  font-size: 0.9rem;
-  font-family: inherit;
-}
-
-#add-venue-form button {
-  padding: 0.5rem;
-  border-radius: 6px;
-  border: none;
-  background: #722f37;
-  color: #fff;
-  font-weight: 600;
-  cursor: pointer;
+  color: #000;
 }
 
 /* comments inside popups */
 .comments-section {
-  margin-top: 0.5rem;
-  border-top: 1px solid #e5e7eb;
-  padding-top: 0.4rem;
+  margin-top: 0.6rem;
+  border-top: 1px solid var(--hairline);
+  padding-top: 0.5rem;
 }
 
 .comments-heading {
-  font-weight: 600;
-  font-size: 0.85rem;
-  margin-bottom: 0.3rem;
+  font-weight: 500;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  margin-bottom: 0.4rem;
 }
 
 .comment-list {
@@ -318,63 +530,89 @@ body {
 
 .comment-item {
   font-size: 0.82rem;
-  padding: 0.25rem 0;
-  border-bottom: 1px dashed #e5e7eb;
+  padding: 0.3rem 0;
+  border-bottom: 1px dashed var(--hairline);
 }
 
 .comment-author {
   display: block;
-  font-weight: 600;
-  color: #722f37;
-  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--accent-title);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .comment-muted {
   font-size: 0.82rem;
-  color: #6b7280;
+  color: var(--muted);
   font-style: italic;
 }
 
 .comment-form {
   display: flex;
-  gap: 0.3rem;
-  margin-top: 0.4rem;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
 }
 
 .comment-form textarea {
   flex: 1;
   min-height: 2.2rem;
   font-size: 0.82rem;
-  padding: 0.3rem;
-  border-radius: 6px;
-  border: 1px solid #d1d5db;
+  padding: 0.3rem 0.1rem;
+  border: none;
+  border-bottom: 1px solid var(--hairline);
+  border-radius: 0;
   font-family: inherit;
+  background: transparent;
+}
+
+.comment-form textarea:focus {
+  outline: none;
+  border-bottom-color: var(--accent-link);
 }
 
 .comment-form button {
   border: none;
-  background: #0f766e;
+  background: #000;
   color: #fff;
-  border-radius: 6px;
-  padding: 0 0.6rem;
+  border-radius: 0;
+  padding: 0 0.7rem;
   cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.75rem;
+}
+
+.comment-form button:hover {
+  background: var(--accent-link);
 }
 
 /* mobile tweaks */
 @media (max-width: 480px) {
-  #app-header {
-    flex-wrap: wrap;
-  }
-  #app-header h1 {
-    font-size: 0.95rem;
-  }
   #category-select {
     max-width: none;
     width: 100%;
   }
+  #auth-signed-out,
+  #auth-signed-in {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
+/* add-venue panel becomes a bottom sheet on narrow screens, so the map
+   stays visible above it for tapping a location */
+@media (max-width: 700px) {
   #add-venue-panel {
-    top: 0.6rem;
+    top: auto;
+    left: 0.6rem;
+    right: 0.6rem;
     bottom: 0.6rem;
-    max-height: none;
+    width: auto;
+    max-width: none;
+    max-height: 55vh;
+    border-left: none;
+    border: 1px solid var(--hairline);
   }
 }

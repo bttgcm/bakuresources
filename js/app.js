@@ -3,15 +3,15 @@
 
   var BAKU_CENTER = [40.3777, 49.8920];
   var DEFAULT_ZOOM = 12;
-  var MARKER_COLOR = "#722F37"; // wine red — curated (CSV) venues
-  var DB_MARKER_COLOR = "#0f766e"; // teal — community-added venues
+  var MARKER_COLOR = "#ff3366"; // accent-title — curated (CSV) venues
+  var DB_MARKER_COLOR = "#0066ff"; // accent-link — community-added venues
   var MARKER_RADIUS = 5;
 
   var map = L.map("map", { zoomControl: true }).setView(BAKU_CENTER, DEFAULT_ZOOM);
 
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 19,
-    attribution: "&copy; OpenStreetMap contributors"
+  L.maplibreGL({
+    style: "https://tiles.openfreemap.org/styles/liberty",
+    attribution: "&copy; OpenFreeMap &copy; OpenMapTiles &copy; OpenStreetMap contributors"
   }).addTo(map);
 
   var markersLayer = L.layerGroup().addTo(map);
@@ -36,6 +36,7 @@
   var addVenueLocation = document.getElementById("add-venue-location");
   var addVenueForm = document.getElementById("add-venue-form");
   var addVenueName = document.getElementById("add-venue-name");
+  var addVenueCategory = document.getElementById("add-venue-category");
   var addVenueDescription = document.getElementById("add-venue-description");
   var addVenueAddress = document.getElementById("add-venue-address");
   var addVenueUrl = document.getElementById("add-venue-url");
@@ -47,6 +48,15 @@
     loadingEl.hidden = !isLoading;
   }
 
+  function populateCategoryOptions(selectEl) {
+    categories.forEach(function (cat) {
+      var opt = document.createElement("option");
+      opt.value = cat.id;
+      opt.textContent = (cat.icon ? cat.icon + " " : "") + cat.label;
+      selectEl.appendChild(opt);
+    });
+  }
+
   function loadCategories() {
     return fetch("data/categories.json")
       .then(function (res) {
@@ -55,12 +65,8 @@
       })
       .then(function (data) {
         categories = data;
-        categories.forEach(function (cat) {
-          var opt = document.createElement("option");
-          opt.value = cat.id;
-          opt.textContent = (cat.icon ? cat.icon + " " : "") + cat.label;
-          select.appendChild(opt);
-        });
+        populateCategoryOptions(select);
+        populateCategoryOptions(addVenueCategory);
       });
   }
 
@@ -343,6 +349,7 @@
     addVenueBtn.addEventListener("click", function () {
       addingVenue = true;
       addVenuePanel.hidden = false;
+      if (currentCategoryId) addVenueCategory.value = currentCategoryId;
       map.getContainer().style.cursor = "crosshair";
     });
   }
@@ -396,7 +403,8 @@
       return;
     }
     var name = addVenueName.value.trim();
-    if (!name || !currentCategoryId) return;
+    var chosenCategoryId = addVenueCategory.value;
+    if (!name || !chosenCategoryId) return;
 
     var latlng = pendingMarker.getLatLng();
     var data = {
@@ -410,10 +418,11 @@
 
     var saveBtn = document.getElementById("add-venue-save");
     saveBtn.disabled = true;
-    window.VenuesDB.addVenue(currentCategoryId, data)
+    window.VenuesDB.addVenue(chosenCategoryId, data)
       .then(function () {
         exitAddingMode();
-        renderCategory(currentCategoryId);
+        select.value = chosenCategoryId;
+        renderCategory(chosenCategoryId);
       })
       .catch(function (err) {
         console.error("addVenue", err);
