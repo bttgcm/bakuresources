@@ -349,9 +349,7 @@
     currentCategoryId = catId;
     setLoading(true);
 
-    var dbVenuesPromise = currentUser
-      ? window.VenuesDB.fetchDbVenues(cat.id)
-      : Promise.resolve([]);
+    var dbVenuesPromise = window.VenuesDB.fetchDbVenues(cat.id);
 
     Promise.all([loadCategoryData(cat), dbVenuesPromise])
       .then(function (results) {

@@ -33,8 +33,8 @@ sign-ups, so nobody else can self-register an account.
 
 Share just the username (`team`) and password with your ~20 people (e.g. in
 your group chat) — they never see or type the fake email. Anyone without it
-can still view the original CSV-based venues (unchanged), but won't be able
-to see or add community venues/comments.
+can still view every venue, CSV-based and community-added alike, but won't
+be able to see comments, or add new venues/comments themselves.
 
 If you want a different fake domain than `baku-resources.local`, change the
 `USERNAME_DOMAIN` constant near the top of `js/auth.js` to match.

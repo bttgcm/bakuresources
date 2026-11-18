@@ -32,9 +32,9 @@ create index if not exists comments_venue_ref_idx on comments (venue_ref);
 alter table venues enable row level security;
 alter table comments enable row level security;
 
-create policy "Authenticated users can read venues"
+create policy "Anyone can read venues"
   on venues for select
-  using (auth.role() = 'authenticated');
+  using (true);
 
 create policy "Authenticated users can add venues"
   on venues for insert
@@ -51,6 +51,7 @@ create policy "Authenticated users can add comments"
 -- Tables created via the SQL editor (unlike the dashboard's table UI) don't
 -- automatically grant table-level privileges to the authenticated role —
 -- RLS policies alone aren't enough, Postgres checks base GRANTs first.
-grant usage on schema public to authenticated;
+grant usage on schema public to authenticated, anon;
 grant select, insert on public.venues to authenticated;
+grant select on public.venues to anon;
 grant select, insert on public.comments to authenticated;
