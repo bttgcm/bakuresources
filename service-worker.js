@@ -1,6 +1,6 @@
 // Minimal app-shell cache so the PWA is installable and opens offline.
 // Bump this on each deploy that changes shell files, so clients refresh.
-const CACHE_NAME = "baku-resources-shell-v1";
+const CACHE_NAME = "baku-resources-shell-v2";
 
 const SHELL_FILES = [
   "./",

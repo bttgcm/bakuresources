@@ -47,6 +47,49 @@
   var addingVenue = false;
   var pendingMarker = null;
 
+  // ---- "my location" ----
+  var locateBtn = document.getElementById("locate-btn");
+  var locationMarker = null;
+  var locationCircle = null;
+
+  function showUserLocation(e) {
+    if (locationMarker) map.removeLayer(locationMarker);
+    if (locationCircle) map.removeLayer(locationCircle);
+    locationMarker = L.circleMarker(e.latlng, {
+      radius: 7,
+      color: "#0066ff",
+      fillColor: "#0066ff",
+      fillOpacity: 1,
+      weight: 2
+    }).addTo(map);
+    locationCircle = L.circle(e.latlng, {
+      radius: e.accuracy,
+      color: "#0066ff",
+      weight: 1,
+      fillOpacity: 0.08
+    }).addTo(map);
+  }
+
+  if (locateBtn) {
+    locateBtn.addEventListener("click", function () {
+      locateBtn.disabled = true;
+      locateBtn.textContent = "📍 Locating…";
+      map.locate({ setView: true, maxZoom: 16, enableHighAccuracy: true });
+    });
+
+    map.on("locationfound", function (e) {
+      showUserLocation(e);
+      locateBtn.disabled = false;
+      locateBtn.textContent = "📍 My location";
+    });
+
+    map.on("locationerror", function (e) {
+      locateBtn.disabled = false;
+      locateBtn.textContent = "📍 My location";
+      alert("Could not get your location: " + e.message);
+    });
+  }
+
   function setLoading(isLoading) {
     loadingEl.hidden = !isLoading;
   }
